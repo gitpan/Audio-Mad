@@ -19,3 +19,4 @@ lib/Audio/Mad/Resample.pm
 lib/Audio/Mad/Stream.pm
 lib/Audio/Mad/Synth.pm
 lib/Audio/Mad/Timer.pm
+lib/Audio/Mad/Util.pm

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 require Exporter;
 require DynaLoader;
