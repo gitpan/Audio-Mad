@@ -8,7 +8,7 @@ Audio::Mad::Stream - Interface to mad_stream structure
 
 =head1 SYPNOSIS
 
- my $stream = new Audio::Mad::Stream;
+ my $stream = new Audio::Mad::Stream ($options);
  $stream->buffer($scalar);
  
  my $remain = substr($scalar, $stream->next_frame);
@@ -16,6 +16,10 @@ Audio::Mad::Stream - Interface to mad_stream structure
  
  $stream->skip($position + 400);
  $stream->sync();
+ 
+ $options = $stream->options();
+ $options |= MAD_OPTION_IGNORECRC;
+ $stream->options($options);
  
  unless ($stream->err_ok()) {
  	print "error code was: " . $stream->error() . "\n";
@@ -32,10 +36,12 @@ Audio::Mad::Stream - Interface to mad_stream structure
 
 =over 4
 
-=item * new
+=item * new(options)
 
  Allocates and initializes a new mad_stream structure,  and 
- provides us with a handle to access it.
+ provides us with a handle to access it.  You may optionally
+ pass an integer value as the first argument to set the
+ stream options.
 
 =item * buffer(scalar)
 
@@ -75,6 +81,12 @@ Audio::Mad::Stream - Interface to mad_stream structure
 
  Returns 1 if the last error is recoverable,  according to the 
  MAD_RECOVERABLE macro.
+
+=item * options(options)
+
+ Returns the current set of options for the current stream.
+ When called with a paramater,  it sets the options of the 
+ stream.
  
 =back
 

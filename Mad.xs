@@ -37,11 +37,15 @@ constant(sv,arg)
 MODULE = Audio::Mad		PACKAGE = Audio::Mad::Stream
 
 Audio_Mad_Stream
-new(CLASS)
-		char *CLASS = NO_INIT;
+new(CLASS, options=0)
+		char *CLASS = NO_INIT
+		int options
 	CODE:
 		Newz(0, (void *)RETVAL, sizeof(*RETVAL), char);
 		mad_stream_init(RETVAL);
+		
+		if (options)
+			mad_stream_options(RETVAL, options);
 	OUTPUT:
 		RETVAL
 		
@@ -105,9 +109,21 @@ err_ok(THIS)
 	OUTPUT:
 		RETVAL
 		
+int
+options(THIS, options=0)
+		Audio_Mad_Stream THIS
+		int options
+	CODE:
+		if (options)
+			mad_stream_options(THIS, options);
+			
+		RETVAL = THIS->options;
+	OUTPUT:
+		RETVAL
+		
 void
 DESTROY(THIS)
-		Audio_Mad_Stream THIS;
+		Audio_Mad_Stream THIS
 	CODE:
 		mad_stream_finish(THIS);
 		Safefree(THIS);
@@ -518,7 +534,7 @@ dither(THIS, leftsv, rightsv=&PL_sv_undef)
 
 		THIS->pcmfunc(&THIS->info, cooked, old_length, left, right);
 		PUSHs(sv_2mortal(newSVpvn(cooked, length)));
-
+		
 		Safefree(cooked);
 		
 void

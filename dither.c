@@ -142,7 +142,7 @@ void mad_dither_s8(struct mad_dither_info *de, unsigned char *data, unsigned int
 void mad_dither_s16_le(struct mad_dither_info *de, unsigned char *data, unsigned int samples, mad_fixed_t const *left, mad_fixed_t const *right) {
 	unsigned int length = samples;
 	register signed int sample0, sample1;
-	
+
 	if (right) {
 		while (length--) {
 			sample0 = mad_dither_linear(de, &de->state[0], 16, *left++);
@@ -162,7 +162,7 @@ void mad_dither_s16_le(struct mad_dither_info *de, unsigned char *data, unsigned
 			data[0] = sample0 >> 0;
 			data[1] = sample0 >> 8;
 			
-			data += 4;
+			data += 2;
 		}
 	}
 }
@@ -190,7 +190,7 @@ void mad_dither_s16_be(struct mad_dither_info *de, unsigned char *data, unsigned
 			data[0] = sample0 >> 8;
 			data[1] = sample0 >> 0;
 			
-			data += 4;
+			data += 2;
 		}
 	}
 }
@@ -270,11 +270,11 @@ void mad_dither_s32_le(struct mad_dither_info *de, unsigned char *data, unsigned
 			
 			data[0] = 0;
 			data[1] = sample0 >> 0;
-			data[2] = sample1 >> 8;
-			data[3] = sample1 >> 16;
+			data[2] = sample0 >> 8;
+			data[3] = sample0 >> 16;
 
 			data[4] = 0;
-			data[5] = sample0 >> 0;
+			data[5] = sample1 >> 0;
 			data[6] = sample1 >> 8;
 			data[7] = sample1 >> 16;			
 			
@@ -304,11 +304,11 @@ void mad_dither_s32_be(struct mad_dither_info *de, unsigned char *data, unsigned
 			sample1 = mad_dither_linear(de, &de->state[1], 24, *right++);
 
 			data[0] = sample0 >> 16;
-			data[1] = sample1 >> 8;
-			data[2] = sample1 >> 0;
+			data[1] = sample0 >> 8;
+			data[2] = sample0 >> 0;
 			data[3] = 0;
 			
-			data[4] = sample0 >> 16;
+			data[4] = sample1 >> 16;
 			data[5] = sample1 >> 8;
 			data[6] = sample1 >> 0;			
 			data[7] = 0;

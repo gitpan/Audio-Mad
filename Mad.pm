@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Carp;
 
+our $VERSION = '0.5';
+
 require Exporter;
 require DynaLoader;
 
@@ -44,6 +46,8 @@ our @EXPORT_OK = qw(
 	MAD_MODE_SINGLE_CHANNEL   MAD_MODE_DUAL_CHANNEL 
 	MAD_MODE_JOINT_STEREO     MAD_MODE_STEREO
 	
+	MAD_OPTION_IGNORECRC	  MAD_OPTION_HALFSAMPLERATE
+
 	MAD_TIMER_RESOLUTION
 	
 	MAD_UNITS_8000_HZ         MAD_UNITS_MILLISECONDS
@@ -84,6 +88,7 @@ our %EXPORT_TAGS = (
 	f      => [qw(MAD_F_ONE MAD_F_MIN MAD_F_MAX MAD_F_FRACBITS)],
 	layer  => [qw(MAD_LAYER_I MAD_LAYER_II MAD_LAYER_III)],
 	mode   => [qw(MAD_MODE_SINGLE_CHANNEL MAD_MODE_DUAL_CHANNEL MAD_MODE_JOINT_STEREO MAD_MODE_STEREO)],
+	option => [qw(MAD_OPTION_HALFSAMPLERATE MAD_OPTION_IGNORECRC)],
 	timer  => [qw(MAD_TIMER_RESOLUTION)],
 	units  => [qw(
 		MAD_UNITS_11025_HZ     MAD_UNITS_12000_HZ     MAD_UNITS_16000_HZ
@@ -94,7 +99,7 @@ our %EXPORT_TAGS = (
 	)],
 );
 
-our $VERSION = '0.4';
+
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -175,61 +180,49 @@ use overload (
 );
 	
 sub o_add { 
-	my ($lh, $rh) = @_;
+	my ($lh, $rh, $how) = @_;
 
 	$rh = new Audio::Mad::Timer (int($rh), ($rh - int($rh)) * 1000, Audio::Mad::MAD_UNITS_MILLISECONDS())
 		if (!ref($rh));
 
-	my $retval = $lh->new_copy();
-	$retval->add($rh);
+	$lh = $lh->new_copy() if (defined($how));
 
-	return $retval;
+	$lh->add($rh);
 }
 
-sub o_inc {
-	my ($lh) = @_;
-	$lh->add(Audio::Mad::Timer->new(1, 0, 0));
-
-	return $lh;
-}
+sub o_inc { $_[0]->add(Audio::Mad::Timer->new(1, 0, 0)) }
 
 sub o_subtract { 
 	my ($lh, $rh, $how) = @_;
 	
-	if (!ref($rh)) { $rh = Audio::Mad::Timer->new(int($rh), ($rh - int($rh)) * 1000, Audio::Mad::MAD_UNITS_MILLISECONDS())->negate() } 
-	else           { $rh = $rh->new_copy()->negate() }
+	if (!ref($rh)) { $rh = Audio::Mad::Timer->new(int($rh), ($rh - int($rh)) * 1000, Audio::Mad::MAD_UNITS_MILLISECONDS()) } 
+	else           { $rh = $rh->new_copy() }
 	
-	($rh, $lh) = ($lh, $rh) if ($how);
+	if (defined($how)) {
+		($rh, $lh) = ($lh, $rh) if ($how);
+		$lh = $lh->new_copy();
+	}
 
-	my $retval = $lh->new_copy();
-	$retval->add($rh);
-	
-	return $retval;
+	$lh->add($rh->negate());
 }
 
-sub o_dec {
-	my ($lh) = @_;
-	$lh->add(Audio::Mad::Timer->new(1, 0, 0)->negate());
-
-	return $lh;
-}
+sub o_dec { $_[0]->add(Audio::Mad::Timer->new(1, 0, 0)->negate()) }
 	
 sub o_multiply { 
-	my ($lh, $rh) = @_;
+	my ($lh, $rh, $how) = @_;
 	
 	$rh = $rh->count(&MAD_UNITS_SECONDS) if (ref($rh));
 
-	my $retval = $lh->new_copy();
-	$retval->multiply($rh);
-	
-	return $retval;
+	$lh = $lh->new_copy() if (defined($how));
+
+	$lh->multiply($rh);
 }
 
 sub o_divide {
 	my ($lh, $rh, $how) = @_;
 	
 	$lh = 0 + $lh;
-	$rh = 0 + $rh if (ref($rh));
+	$rh = 0 + $rh;
 	
 	($lh, $rh) = ($rh, $lh) if ($how);
 	my $result = $lh / $rh;

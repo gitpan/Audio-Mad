@@ -1,4 +1,16 @@
-Revision history for Perl extension Mad.
+Revision history for Perl extension Audio::Mad.
+
+0.5
+	- corrected a segfault while decoding mono streams with
+	  MAD_DITHER_S16_*
+	  
+	- added in 'option' method to Audio::Mad::Stream to set
+	  stream flags.  flags can also be set in the 'new'
+	  class method,  by sending them as the first paramater.
+	  
+	- corrected typo in dither.c,  the mad_dither_s32_{le,be}
+	  routines were ordering the bytes of the sample 
+	  incorrectly.
 
 0.4  Thu Jun  9 00:02:00 2002
 	- changed module name space from 'Mad' to 'Audio::Mad'
